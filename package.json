@@ -1,6 +1,6 @@
 {
-  "name": "trustmode",
-  "version": "0.1.0",
+  "name": "trustmode-v2",
+  "version": "2.0.0",
   "private": true,
   "packageManager": "pnpm@10.13.1",
   "scripts": {

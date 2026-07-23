@@ -1,1 +1,22 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TrustMode</title><link rel="stylesheet" href="sidepanel.css"></head><body><header><div class="mark">▱</div><b>TrustMode</b><span id="state">Ready</span></header><main id="app"></main><footer><button id="pause">Ⅱ Pause</button><button id="stop">■ Stop</button></footer><script src="sidepanel.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>TrustMode</title>
+    <link rel="stylesheet" href="sidepanel.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="mark" aria-hidden="true">◫</div>
+      <span><b>TrustMode</b><small>Owner review</small></span>
+      <em id="connection">Checking…</em>
+    </header>
+    <main id="app" aria-live="polite"></main>
+    <footer>
+      <button id="pause" disabled>Ⅱ <span>Pause</span></button>
+      <button id="stop" disabled>■ <span>Stop</span></button>
+    </footer>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

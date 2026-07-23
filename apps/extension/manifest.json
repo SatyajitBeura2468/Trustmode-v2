@@ -1,15 +1,27 @@
 {
   "manifest_version": 3,
-  "name": "TrustMode Demo",
-  "version": "0.1.0",
-  "description": "Owner-side TrustMode experience for controlled local fictional portals.",
+  "name": "TrustMode",
+  "version": "2.0.0",
+  "description": "Owner-side approval and controlled execution for TrustMode synthetic portals.",
   "permissions": ["sidePanel", "storage", "activeTab", "scripting"],
-  "host_permissions": ["http://localhost:4175/*", "http://127.0.0.1:4175/*"],
+  "host_permissions": [
+    "https://trustmode-v2.vercel.app/portal/*",
+    "http://localhost:5173/portal/*",
+    "http://127.0.0.1:5173/portal/*",
+    "http://localhost:4390/portal/*",
+    "http://127.0.0.1:4390/portal/*"
+  ],
   "background": { "service_worker": "service-worker.js", "type": "module" },
-  "action": { "default_title": "Open TrustMode" },
+  "action": { "default_title": "Open TrustMode owner review" },
   "side_panel": { "default_path": "sidepanel.html" },
   "content_scripts": [{
-    "matches": ["http://localhost:4175/*", "http://127.0.0.1:4175/*"],
+    "matches": [
+      "https://trustmode-v2.vercel.app/portal/*",
+      "http://localhost:5173/portal/*",
+      "http://127.0.0.1:5173/portal/*",
+      "http://localhost:4390/portal/*",
+      "http://127.0.0.1:4390/portal/*"
+    ],
     "js": ["content-script.js"],
     "run_at": "document_idle"
   }],

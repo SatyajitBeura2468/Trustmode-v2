@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/SatyajitBeura2468/Trustmode/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/SatyajitBeura2468/Trustmode/ci.yml?branch=main&style=flat-square&label=quality"></a>
+  <a href="https://github.com/SatyajitBeura2468/Trustmode-v2/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/SatyajitBeura2468/Trustmode-v2/ci.yml?branch=main&style=flat-square&label=quality"></a>
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-315ff4?style=flat-square">
   <img alt="WCAG target" src="https://img.shields.io/badge/WCAG-2.2_AA-16785a?style=flat-square">
   <img alt="Chrome extension" src="https://img.shields.io/badge/Chrome-Manifest_V3-9d6200?style=flat-square">
@@ -38,13 +38,13 @@
   </a>
 </p>
 
-## Live demo
+## Live product
 
-The public demonstration is a real, interactive, secret-free Vite application. Choose a fictional scholarship, hospital-registration, or college-admission workflow; create an Intent Contract; invite a synthetic helper; prepare semantic proposals; review privacy and consequences; approve changes owner-side; trigger a blocked dangerous action; stop the session; and generate a readable receipt.
+The public v2 product is a real, interactive, secret-free controlled collaboration system. Choose a fictional scholarship, hospital-registration, or college-admission workflow; create an enforceable Intent Contract; issue an expiring helper capability; collaborate across tabs; prepare semantic proposals; run six fail-closed policy checks; review privacy and consequences; apply approved changes owner-side; stop and revoke the session; and export an integrity-linked receipt.
 
 **Launch:** [trustmode-v2.vercel.app](https://trustmode-v2.vercel.app)
 
-> TrustMode is a controlled concept prototype. It uses synthetic data and makes no real submission, payment, account, identity, or medical-record change.
+> TrustMode v2 is a functional controlled product using synthetic workflows. It deliberately makes no real submission, payment, account, identity, or medical-record change.
 
 ## Why TrustMode exists
 
@@ -67,6 +67,8 @@ The owner sees what will change, the evidence used, what stays private, the cons
 | Purpose-bound privacy | A derived fact can be shared without disclosing the source document. |
 | Sequence-aware policy | A group of individually plausible actions can still be blocked as a dangerous path. |
 | Owner-only final gate | Submission, payment, recovery, passwords, OTPs, and irreversible decisions never transfer to a helper. |
+| Expiring capability | The helper receives a purpose-bound token plus a separate six-digit verification code, never the owner session. |
+| Integrity-linked history | Every lifecycle event is revisioned and chained into a sanitised, downloadable receipt. |
 
 ## Product tour
 
@@ -128,18 +130,18 @@ flowchart LR
   G --> X["Redacted receipt"]
 ```
 
-`@trustmode/core` owns typed scenarios, action semantics, redaction, proposal policy, and sequence-risk rules. The deployed demo stores a versioned synthetic snapshot in browser storage and can synchronise same-browser demo tabs with `BroadcastChannel`; it needs no secret, paid API, or database.
+`@trustmode/core` owns the pure session state machine, typed commands, expiring capabilities, proposal lifecycle, action semantics, six-check fail-closed policy, redaction, integrity events, controlled portal state, and receipts. The deployed product stores a versioned synthetic snapshot in browser storage and synchronises same-browser tabs with `BroadcastChannel` plus storage-event fallback. It needs no secret, paid API, or database.
 
 ## Repository structure
 
 ```text
 apps/
-├── web-demo/       Public integrated Vite + React demonstration
+├── web-demo/       Public integrated Vite + React controlled product
 ├── helper/         Standalone helper Ghost Workspace
 ├── demo-portals/   Three controlled fictional service portals
-└── extension/      Chrome Manifest V3 owner-side prototype
+└── extension/      Chrome Manifest V3 owner-side controlled portal adapter
 packages/
-└── core/           Typed scenarios, protocol, privacy and policy rules
+└── core/           Session machine, capabilities, protocol, policy and receipts
 docs/               Product, architecture, UX, visual, privacy and threat-model docs
 tests/e2e/          Desktop/mobile Playwright journeys and accessibility checks
 assets/readme/      Custom brand assets and production-origin screenshots
@@ -150,13 +152,13 @@ assets/readme/      Custom brand assets and production-origin screenshots
 Requirements: Node.js 22+ and pnpm 10.13.1.
 
 ```bash
-git clone https://github.com/SatyajitBeura2468/Trustmode.git
-cd Trustmode
+git clone https://github.com/SatyajitBeura2468/Trustmode-v2.git
+cd Trustmode-v2
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-The public demo opens at `http://localhost:5173`.
+The public product opens at `http://localhost:5173` with the standard dev command. The automated browser suite uses isolated port `4390`.
 
 Run the companion surfaces:
 
@@ -176,10 +178,10 @@ pnpm --filter @trustmode/extension build
 2. Enable **Developer mode**.
 3. Choose **Load unpacked**.
 4. Select `apps/extension/dist`.
-5. Run the controlled portals with `pnpm dev:portals`.
-6. Open `http://localhost:4175`, select the TrustMode toolbar action, and open the side panel.
+5. Run the integrated product with `pnpm dev:web`.
+6. Open a controlled route such as `http://127.0.0.1:4390/portal/scholarship`, select the TrustMode toolbar action, and open the side panel.
 
-The extension requests only `sidePanel`, `storage`, `activeTab`, and `scripting`, with host access restricted to the local controlled portal origins. It uses no remote executable code, `eval`, browsing-history access, or unrelated-tab permission.
+The extension requests only `sidePanel`, `storage`, `activeTab`, and `scripting`, with host access restricted to the production and local TrustMode controlled portal routes. It uses no remote executable code, `eval`, browsing-history access, or unrelated-tab permission.
 
 ## Testing and production build
 
@@ -214,11 +216,11 @@ See [Architecture](./docs/ARCHITECTURE.md), [Action protocol](./docs/ACTION_PROT
 
 ## Current limitations
 
-TrustMode currently supports controlled fictional workflows, not arbitrary sites or real sensitive accounts. It does not process OTPs, payments, biometrics, legally binding signatures, medical-record modifications, government submissions, or account recovery. Same-browser demo synchronisation is not a production collaboration backend. The prototype requires independent security, privacy, accessibility, legal, and human-factors review before any real-world use.
+TrustMode currently supports controlled fictional workflows, not arbitrary sites or real sensitive accounts. It does not process OTPs, payments, biometrics, legally binding signatures, medical-record modifications, government submissions, or account recovery. Same-browser synchronisation is not an internet collaboration backend. A future real-world release would require authenticated multi-device transport and independent security, privacy, accessibility, legal, and human-factors review.
 
 ## Project status
 
-Flagship concept prototype: complete interactive web demonstration, helper workspace, fictional portals, owner extension, shared policy package, documentation, CI, automated tests, and verified public Vercel deployment.
+Controlled product v2: complete session engine, expiring helper capability, dedicated helper workspace, owner review and application, controlled portals, owner extension, fail-closed policy package, integrity receipts, responsive interfaces, documentation, CI, automated tests, and public Vercel deployment.
 
 ## Copyright
 

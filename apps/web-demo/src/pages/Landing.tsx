@@ -110,5 +110,5 @@ export function Landing() {
 }
 
 function BrandFooter() {
-  return <div className="footer-inner"><div className="footer-brand"><Mark /><strong>TrustMode</strong></div><p>Concept prototype · Synthetic data only · Not for real sensitive accounts</p><span>© 2026 Satyajit Beura</span></div>;
+  return <div className="footer-inner"><div className="footer-brand"><Mark /><strong>TrustMode</strong></div><p>Controlled product v2 · Synthetic workflows only · Final actions stay owner-only</p><span>© 2026 Satyajit Beura</span></div>;
 }

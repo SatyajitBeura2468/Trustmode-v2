@@ -4,6 +4,8 @@ import { Landing } from "./pages/Landing";
 import { DemoStart } from "./pages/DemoStart";
 import { Workspace } from "./pages/Workspace";
 import { InfoPage } from "./pages/Info";
+import { HelperWorkspacePage } from "./pages/HelperWorkspace";
+import { ControlledPortalPage } from "./pages/ControlledPortal";
 
 export function App() {
   const location = useLocation();
@@ -17,7 +19,8 @@ export function App() {
       <Route path="/demo/:scenario" element={<DemoStart />} />
       <Route path="/demo/:scenario/session" element={<Workspace />} />
       <Route path="/owner" element={<Navigate to="/demo/scholarship/session" replace />} />
-      <Route path="/helper" element={<Navigate to="/demo/scholarship/session" replace />} />
+      <Route path="/helper" element={<HelperWorkspacePage />} />
+      <Route path="/portal/:scenario" element={<ControlledPortalPage />} />
       <Route path="/review" element={<Navigate to="/demo/scholarship/session" replace />} />
       <Route path="/privacy-preview" element={<Workspace initialStage="privacy" />} />
       <Route path="/blocked-action" element={<Workspace initialStage="blocked" />} />

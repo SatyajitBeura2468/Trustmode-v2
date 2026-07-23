@@ -21,12 +21,18 @@ const proposal = (
   privacy,
   consequence,
   statement,
+  purpose: consequence,
   confidence,
   action: "set-field",
   reversible: true,
   risk: "low",
   ownerOnly: false,
   status: "pending",
+  target: {
+    adapter: "controlled-portal",
+    field: id,
+    expectedCurrent: current,
+  },
 });
 
 export const scenarios: Record<ScenarioId, Scenario> = {
@@ -44,6 +50,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
       "Household income is below the eligibility limit.",
       "Class 10 certificate is valid.",
     ],
+    allowedTargets: ["board", "passing-year", "institution"],
     proposals: [
       proposal("scholarship", "board", "Board", "Not provided", "CBSE", "Class 10 certificate · verified", "The complete certificate stays hidden. Only the board name is shared.", "This fills one education field. It does not submit the application.", "Select CBSE as the applicant’s board"),
       proposal("scholarship", "passing-year", "Passing year", "Not provided", "2023", "Class 10 certificate · verified", "The marksheet and roll number stay hidden.", "This adds the passing year and remains editable.", "Set the applicant’s passing year to 2023", 0.93),
@@ -64,6 +71,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
       "The patient is eligible for the concession category.",
       "A valid referral is available.",
     ],
+    allowedTargets: ["department", "visit-type", "language"],
     proposals: [
       proposal("hospital", "department", "Department", "Not selected", "General medicine", "Referral category · verified", "The referral document and diagnosis stay hidden.", "This selects a department only. It does not book or pay.", "Select General medicine as the department"),
       proposal("hospital", "visit-type", "Visit type", "Not selected", "First consultation", "Registration history · derived", "Past visit details stay hidden.", "This selects the consultation type and remains reversible.", "Set visit type to First consultation", 0.94),
@@ -84,6 +92,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
       "The qualifying certificate is valid.",
       "The applicant belongs to the eligible district.",
     ],
+    allowedTargets: ["programme", "board", "hostel"],
     proposals: [
       proposal("admission", "programme", "Programme", "Not selected", "B.Sc. Physics", "Course preference", "Rank and identity values stay hidden.", "This records a course preference; it does not accept an offer.", "Select B.Sc. Physics as the programme"),
       proposal("admission", "board", "Qualifying board", "Not provided", "CHSE Odisha", "Class 12 certificate · verified", "The certificate number and marks stay hidden.", "This fills the board field and remains editable.", "Set qualifying board to CHSE Odisha", 0.95),

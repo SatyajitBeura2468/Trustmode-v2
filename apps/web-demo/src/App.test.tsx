@@ -1,11 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { DemoProvider } from "./state/DemoContext";
 import { App } from "./App";
 
 beforeAll(() => {
   vi.stubGlobal("scrollTo", vi.fn());
+});
+
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
 });
 
 function renderAt(path: string) {
@@ -20,7 +25,7 @@ describe("TrustMode web demo", () => {
   it("renders the core promise and live demo action", () => {
     renderAt("/");
     expect(screen.getByRole("heading", { name: /digital help/i })).toBeTruthy();
-    expect(screen.getByRole("link", { name: /try the safe demo/i })).toBeTruthy();
+    expect(screen.getByRole("link", { name: /start a controlled session/i })).toBeTruthy();
   });
 
   it("renders the Intent Contract for a selected scenario", () => {

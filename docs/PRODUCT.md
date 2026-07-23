@@ -1,6 +1,6 @@
 # Product constitution
 
-TrustMode is a proposal-based digital-assistance prototype. A person explains a task, sets an Intent Contract, and invites a helper. The helper works with semantic structure and derived facts inside a Ghost Workspace. The owner reviews every proposed change, sees privacy and consequence previews, and alone authorises local execution.
+TrustMode v2 is a functional proposal-based digital-assistance product for controlled synthetic workflows. A person explains a task, sets an Intent Contract, and issues an expiring verified capability. The helper works with semantic structure and derived facts inside a Ghost Workspace. The owner reviews every proposed change, sees policy evidence, privacy and consequence previews, and alone authorises controlled execution.
 
 ## Modes
 
@@ -14,4 +14,4 @@ Digital help without surrendering control. The helper never receives the ownerâ€
 
 ## Demonstrated workflows
 
-Scholarship application, hospital registration, and college admission use deterministic synthetic data. The prototype teaches the operating model; it does not connect to real services.
+Scholarship application, hospital registration, and college admission use deterministic synthetic data. Each workflow supports a complete contract, invite, helper preparation, policy review, owner decision, controlled portal update, emergency revocation, and integrity receipt. The product does not connect to real services.
