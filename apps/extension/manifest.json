@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "TrustMode Demo",
+  "version": "0.1.0",
+  "description": "Owner-side TrustMode experience for controlled local fictional portals.",
+  "permissions": ["sidePanel", "storage", "activeTab", "scripting"],
+  "host_permissions": ["http://localhost:4175/*", "http://127.0.0.1:4175/*"],
+  "background": { "service_worker": "service-worker.js", "type": "module" },
+  "action": { "default_title": "Open TrustMode" },
+  "side_panel": { "default_path": "sidepanel.html" },
+  "content_scripts": [{
+    "matches": ["http://localhost:4175/*", "http://127.0.0.1:4175/*"],
+    "js": ["content-script.js"],
+    "run_at": "document_idle"
+  }],
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'self'" }
+}

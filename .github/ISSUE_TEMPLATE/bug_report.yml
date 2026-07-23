@@ -1,0 +1,14 @@
+name: Bug report
+description: Report a reproducible TrustMode demo defect.
+body:
+  - type: dropdown
+    attributes: { label: Surface, options: [Web demo, Helper workspace, Demo portal, Chrome extension] }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: What happened, description: Include the scenario and exact steps. }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Expected safe behaviour }
+    validations: { required: true }
+  - type: input
+    attributes: { label: Browser and version }

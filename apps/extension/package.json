@@ -1,0 +1,12 @@
+{
+  "name": "@trustmode/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "echo \"Extension uses validated plain JavaScript\"",
+    "lint": "node --check src/sidepanel.js && node --check src/service-worker.js && node --check src/content-script.js",
+    "test": "echo \"Extension policy is covered by core tests\""
+  }
+}

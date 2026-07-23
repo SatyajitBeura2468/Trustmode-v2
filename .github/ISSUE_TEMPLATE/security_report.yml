@@ -1,0 +1,10 @@
+name: Security report
+description: Report a security concern without including real secrets or personal data.
+body:
+  - type: markdown
+    attributes: { value: "Do not paste credentials, OTPs, identity values, medical data, or private documents." }
+  - type: textarea
+    attributes: { label: Concern, description: Use synthetic examples only. }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Potential impact }

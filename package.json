@@ -1,0 +1,23 @@
+{
+  "name": "trustmode",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.13.1",
+  "scripts": {
+    "dev": "pnpm --filter @trustmode/web-demo dev",
+    "dev:web": "pnpm --filter @trustmode/web-demo dev",
+    "dev:helper": "pnpm --filter @trustmode/helper dev",
+    "dev:portals": "pnpm --filter @trustmode/demo-portals dev",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "playwright test",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.54.1",
+    "typescript": "^5.8.3"
+  }
+}

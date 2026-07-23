@@ -1,0 +1,15 @@
+{
+  "name": "@trustmode/helper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 4174",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
+    "lint": "tsc --noEmit",
+    "test": "echo \"Helper behavior is covered by web-demo E2E\""
+  },
+  "dependencies": { "@trustmode/core": "workspace:*" },
+  "devDependencies": { "typescript": "^5.8.3", "vite": "^7.0.4" }
+}

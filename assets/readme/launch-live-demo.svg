@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="176" viewBox="0 0 680 176" role="img" aria-labelledby="title desc">
+  <title id="title">Launch TrustMode live demo</title>
+  <desc id="desc">Open the interactive TrustMode application deployed on Vercel.</desc>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#315FF4"/><stop offset="1" stop-color="#2449C9"/></linearGradient>
+    <filter id="s" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#17328C" flood-opacity=".22"/></filter>
+  </defs>
+  <rect x="18" y="18" width="644" height="140" rx="30" fill="url(#g)" filter="url(#s)"/>
+  <g transform="translate(44 39)">
+    <rect width="98" height="98" rx="24" fill="#FFF" fill-opacity=".14"/>
+    <path d="M20 24 43 17v61L20 73V24Z" fill="none" stroke="#FFF" stroke-width="5" stroke-linejoin="round"/>
+    <path d="m78 24-23-7v61l23-5V24Z" fill="none" stroke="#BEE7DA" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M49 27v15m0 11v20" stroke="#FFF" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <text x="166" y="82" fill="#FFF" font-size="31" font-weight="700" font-family="Arial, sans-serif">Launch TrustMode</text>
+  <text x="166" y="116" fill="#DCE6FF" font-size="20" font-weight="500" font-family="Arial, sans-serif">Open the live interactive demo</text>
+  <path d="m600 77 18 18-18 18m17-18h-36" fill="none" stroke="#FFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

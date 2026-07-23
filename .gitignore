@@ -141,3 +141,12 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# TrustMode local artifacts
+playwright-report/
+test-results/
+.vercel/
+.turbo/
+*.local
+
+.vercel

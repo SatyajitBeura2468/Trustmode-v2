@@ -1,0 +1,10 @@
+name: Accessibility issue
+description: Report an accessibility or inclusive-design barrier.
+body:
+  - type: textarea
+    attributes: { label: Barrier, description: Describe the task you could not complete. }
+    validations: { required: true }
+  - type: input
+    attributes: { label: Assistive technology and browser }
+  - type: textarea
+    attributes: { label: Suggested improvement }
