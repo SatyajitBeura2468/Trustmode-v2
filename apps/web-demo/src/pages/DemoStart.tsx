@@ -47,6 +47,7 @@ export function DemoStart() {
   const [task, setTask] = useState(demo.session.contract.task);
   const [copied, setCopied] = useState(false);
   const [interpreted, setInterpreted] = useState<ScenarioId | null>(null);
+  const [creatingCapability, setCreatingCapability] = useState(false);
   const appliedRouteScenario = useRef<ScenarioId | null>(null);
   const t = getMessages(demo.language);
   const routeScenario = params.scenario && params.scenario in scenarios
@@ -86,6 +87,16 @@ export function DemoStart() {
     demo.joinHelper(demo.session.invite.token, demo.session.invite.verificationCode);
     demo.setStage("workspace");
     navigate(`/demo/${selected}/session`);
+  };
+
+  const createCapability = async () => {
+    setCreatingCapability(true);
+    const published = await demo.publishSession();
+    setCreatingCapability(false);
+    if (published) {
+      demo.setStage("invite");
+      setStep("invite");
+    }
   };
 
   return (
@@ -177,8 +188,8 @@ export function DemoStart() {
             </div>
             <div className="setup-actions">
               <button className="text-button" onClick={() => setStep("scenario")}>Back</button>
-              <button className="button button--large" onClick={() => { demo.setStage("invite"); setStep("invite"); }}>
-                Create temporary capability <ArrowRight />
+              <button className="button button--large" onClick={() => void createCapability()} disabled={creatingCapability}>
+                {creatingCapability ? "Securing shared session…" : "Create temporary capability"} <ArrowRight />
               </button>
             </div>
           </section>
@@ -212,7 +223,7 @@ export function DemoStart() {
                 Continue on this device <ArrowRight />
               </button>
             </div>
-            <p className="local-mode-note"><LockKeyhole /> Controlled-local mode synchronises same-origin tabs. No collaboration server receives the session.</p>
+            <p className="local-mode-note"><LockKeyhole /> Shared session secured in TrustMode’s capability service. The helper receives only this contract’s Ghost Workspace.</p>
             <button className="text-button" onClick={() => setStep("contract")}>Back to boundaries</button>
           </section>
         ) : null}

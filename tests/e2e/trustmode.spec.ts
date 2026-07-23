@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -73,6 +73,37 @@ test("dedicated helper capability synchronises a proposal to the owner tab", asy
   await expect(page.getByText("Approved and applied owner-side")).toBeVisible();
   await helper.close();
 });
+
+test("shared helper link works from a separate browser profile", async ({ browser }, testInfo) => {
+  if (testInfo.project.name !== "chromium") test.skip();
+  await verifySeparateBrowserShare(browser);
+});
+
+async function verifySeparateBrowserShare(browser: Browser) {
+  const ownerContext = await browser.newContext();
+  const owner = await ownerContext.newPage();
+  await owner.goto("/demo/scholarship");
+  await owner.getByRole("button", { name: /Create temporary capability/ }).click();
+  await expect(owner.getByText("Verification code", { exact: true })).toBeVisible();
+  const helperUrl = await owner.locator(".invite-code > span").innerText();
+  const code = await owner.locator(".verification strong").innerText();
+
+  const helperContext = await browser.newContext();
+  const helper = await helperContext.newPage();
+  await helper.goto(helperUrl);
+  await expect(helper.getByRole("heading", { name: "Confirm the code from the owner." })).toBeVisible();
+  await helper.getByLabel(/Six-digit verification code/).fill(code);
+  await helper.getByRole("button", { name: /Verify and enter/ }).click();
+  await expect(helper.getByRole("heading", { name: "Prepare meaning, not control." })).toBeVisible();
+  await helper.locator(".helper-field").filter({ hasText: "Board" }).click();
+  await helper.getByRole("button", { name: /Check and send/ }).click();
+
+  await owner.waitForTimeout(2_000);
+  await owner.getByRole("button", { name: /Continue on this device/ }).click();
+  await expect(owner.getByText("Pass · TM-POL-101", { exact: true })).toBeVisible({ timeout: 10_000 });
+  await helperContext.close();
+  await ownerContext.close();
+}
 
 test("request changes returns the proposal to helper preparation", async ({ page }, testInfo) => {
   await startSameDeviceSession(page, "admission");

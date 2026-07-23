@@ -130,7 +130,7 @@ flowchart LR
   G --> X["Redacted receipt"]
 ```
 
-`@trustmode/core` owns the pure session state machine, typed commands, expiring capabilities, proposal lifecycle, action semantics, six-check fail-closed policy, redaction, integrity events, controlled portal state, and receipts. The deployed product stores a versioned synthetic snapshot in browser storage and synchronises same-browser tabs with `BroadcastChannel` plus storage-event fallback. It needs no secret, paid API, or database.
+`@trustmode/core` owns the pure session state machine, typed commands, expiring capabilities, proposal lifecycle, action semantics, six-check fail-closed policy, redaction, integrity events, controlled portal state, and receipts. TrustMode v2.1 stores shared synthetic sessions in a Supabase Postgres project through capability-checked RPC functions. Owner and helper browsers synchronise with revision-aware polling; browser storage remains only as an owner-device recovery cache.
 
 ## Repository structure
 
@@ -216,7 +216,7 @@ See [Architecture](./docs/ARCHITECTURE.md), [Action protocol](./docs/ACTION_PROT
 
 ## Current limitations
 
-TrustMode currently supports controlled fictional workflows, not arbitrary sites or real sensitive accounts. It does not process OTPs, payments, biometrics, legally binding signatures, medical-record modifications, government submissions, or account recovery. Same-browser synchronisation is not an internet collaboration backend. A future real-world release would require authenticated multi-device transport and independent security, privacy, accessibility, legal, and human-factors review.
+TrustMode currently supports controlled fictional workflows, not arbitrary sites or real sensitive accounts. It does not process OTPs, payments, biometrics, legally binding signatures, medical-record modifications, government submissions, or account recovery. Shared sessions use purpose-bound owner and helper capabilities rather than full user accounts; a future real-world release would require authenticated identity, key rotation, abuse controls, observability, and independent security, privacy, accessibility, legal, and human-factors review.
 
 ## Project status
 

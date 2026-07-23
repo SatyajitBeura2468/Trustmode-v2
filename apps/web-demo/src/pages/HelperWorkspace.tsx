@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   WifiOff,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Header } from "../components/Brand";
 import { useDemo } from "../state/DemoContext";
@@ -23,12 +23,30 @@ function formatDuration(seconds: number): string {
 
 export function HelperWorkspacePage() {
   const demo = useDemo();
+  const { openHelperSession } = demo;
   const [params] = useSearchParams();
   const sessionId = params.get("session");
   const token = params.get("token") ?? "";
   const [code, setCode] = useState("");
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [message, setMessage] = useState("");
+  const [loadingCapability, setLoadingCapability] = useState(Boolean(sessionId && token));
+  const [capabilityLoaded, setCapabilityLoaded] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    if (!sessionId || !token) {
+      setLoadingCapability(false);
+      return () => { active = false; };
+    }
+    void openHelperSession(sessionId, token).then((loaded) => {
+      if (active) {
+        setCapabilityLoaded(loaded);
+        setLoadingCapability(false);
+      }
+    });
+    return () => { active = false; };
+  }, [openHelperSession, sessionId, token]);
   const matchesSession = sessionId === demo.session.id && token === demo.session.invite.token;
   const joined = matchesSession && Boolean(demo.session.invite.joinedAt);
   const preparedIds = useMemo(
@@ -38,8 +56,8 @@ export function HelperWorkspacePage() {
     [demo.scenario.proposals, demo.session.proposalRecords],
   );
 
-  const verify = () => {
-    if (demo.joinHelper(token, code)) setCode("");
+  const verify = async () => {
+    if (await demo.verifyHelperCapability(token, code)) setCode("");
   };
 
   const toggle = (id: string) => {
@@ -55,12 +73,21 @@ export function HelperWorkspacePage() {
     if (demo.sendProposals([...selected])) setSelected(new Set());
   };
 
-  if (!matchesSession) {
+  if (loadingCapability) {
+    return <div className="helper-shell"><Header compact /><main className="helper-invalid" id="main" aria-live="polite">
+      <ShieldCheck />
+      <p className="quiet-label">Loading protected workspace</p>
+      <h1>Verifying the shared capability.</h1>
+      <p>TrustMode is loading the helper-safe view for this contract.</p>
+    </main></div>;
+  }
+
+  if (!matchesSession || !capabilityLoaded) {
     return <div className="helper-shell"><Header compact /><main className="helper-invalid" id="main">
       <WifiOff />
       <p className="quiet-label quiet-label--danger">Capability unavailable</p>
-      <h1>This helper link is not available in this controlled-local browser.</h1>
-      <p>Open the link in the same browser profile as the owner session, or ask the owner for a fresh capability.</p>
+      <h1>This helper link is unavailable.</h1>
+      <p>The capability may be expired, revoked, or incomplete. Ask the owner for a fresh link if needed.</p>
     </main></div>;
   }
 
@@ -87,7 +114,7 @@ export function HelperWorkspacePage() {
         />
       </label>
       {demo.lastError ? <p className="form-error" role="alert">{demo.lastError}</p> : null}
-      <button className="button button--large" onClick={verify} disabled={code.length !== 6}>Verify and enter <ArrowRight /></button>
+      <button className="button button--large" onClick={() => void verify()} disabled={code.length !== 6}>Verify and enter <ArrowRight /></button>
     </main></div>;
   }
 
