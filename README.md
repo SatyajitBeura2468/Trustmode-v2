@@ -14,14 +14,14 @@
 </p>
 
 <p align="center">
-  <a href="https://trustmode.vercel.app">
+  <a href="https://trustmode-v2.vercel.app">
     <img src="./assets/readme/launch-live-demo.svg" width="340" alt="Launch the live TrustMode demo">
   </a>
 </p>
 
 <p align="center">
   <strong>Live application:</strong>
-  <a href="https://trustmode.vercel.app">https://trustmode.vercel.app</a>
+  <a href="https://trustmode-v2.vercel.app">https://trustmode-v2.vercel.app</a>
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@
 </p>
 
 <p align="center">
-  <a href="https://trustmode.vercel.app">
+  <a href="https://trustmode-v2.vercel.app">
     <img src="./assets/readme/screenshots/landing-page.png" width="100%" alt="TrustMode landing page showing the helper and owner separated by a protected proposal passage">
   </a>
 </p>
@@ -42,7 +42,7 @@
 
 The public demonstration is a real, interactive, secret-free Vite application. Choose a fictional scholarship, hospital-registration, or college-admission workflow; create an Intent Contract; invite a synthetic helper; prepare semantic proposals; review privacy and consequences; approve changes owner-side; trigger a blocked dangerous action; stop the session; and generate a readable receipt.
 
-**Launch:** [trustmode.vercel.app](https://trustmode.vercel.app)
+**Launch:** [trustmode-v2.vercel.app](https://trustmode-v2.vercel.app)
 
 > TrustMode is a controlled concept prototype. It uses synthetic data and makes no real submission, payment, account, identity, or medical-record change.
 
@@ -195,7 +195,7 @@ pnpm test:e2e
 To smoke-test the deployed origin:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://trustmode.vercel.app pnpm test:e2e
+PLAYWRIGHT_BASE_URL=https://trustmode-v2.vercel.app pnpm test:e2e
 ```
 
 The production deployment uses the root `vercel.json`, installs the workspace with the frozen lockfile, builds only `@trustmode/web-demo`, disables source maps, and rewrites direct SPA routes to `index.html`.
