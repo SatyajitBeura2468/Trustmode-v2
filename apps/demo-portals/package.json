@@ -11,5 +11,5 @@
     "test": "echo \"Portal behavior is covered by web-demo E2E\""
   },
   "dependencies": { "@trustmode/core": "workspace:*" },
-  "devDependencies": { "typescript": "^5.8.3", "vite": "^7.0.4" }
+  "devDependencies": { "typescript": "^7.0.2", "vite": "^7.0.4" }
 }
