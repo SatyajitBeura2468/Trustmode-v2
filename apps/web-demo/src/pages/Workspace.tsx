@@ -352,6 +352,15 @@ export function Workspace({ initialStage }: { initialStage?: "privacy" | "blocke
     [demo.scenario.proposals, demo.statuses],
   );
 
+  if (scenarioId !== demo.scenarioId) {
+    return <div className="focus-page"><Header compact /><main id="main" className="review-page session-loading" aria-live="polite">
+      <ShieldCheck />
+      <p className="quiet-label">Preparing controlled session</p>
+      <h1>Binding the workspace to its Intent Contract.</h1>
+      <p className="lead">TrustMode is loading the correct scenario and fail-closed policy boundary.</p>
+    </main></div>;
+  }
+
   if (demo.stopped) return <Revoked onRestart={demo.restart} status={demo.session.status} />;
   if (demo.stage === "privacy") return <Preview proposal={selected} onBack={() => demo.setStage("workspace")} />;
   if (demo.stage === "blocked") return <Blocked onBack={() => demo.setStage("workspace")} />;

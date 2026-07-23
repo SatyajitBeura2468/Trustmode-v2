@@ -126,6 +126,10 @@ test("direct public routes refresh successfully", async ({ page }) => {
     expect(response?.status()).toBe(200);
     await expect(page.locator("main")).toBeVisible();
   }
+
+  await page.evaluate(() => localStorage.clear());
+  await page.goto("/demo/admission/session");
+  await expect(page.getByRole("heading", { name: /Select B\.Sc\. Physics/ })).toBeVisible();
 });
 
 test("core pages have no serious accessibility violations", async ({ page }, testInfo) => {
