@@ -6,6 +6,7 @@ import {
   scenarios,
   SessionCommandError,
   type AssistanceMode,
+  type HelperSuggestion,
   type ProposalStatus,
   type Receipt,
   type ScenarioId,
@@ -38,6 +39,7 @@ interface DemoContextValue extends UiState {
   statuses: Record<string, ProposalStatus>;
   paused: boolean;
   stopped: boolean;
+  helperVerified: boolean;
   startedAt: string;
   remainingSeconds: number;
   autoPauseSeconds: number;
@@ -52,11 +54,12 @@ interface DemoContextValue extends UiState {
   setStage: (stage: DemoStage) => void;
   publishSession: () => Promise<boolean>;
   openHelperSession: (sessionId: string, token: string) => Promise<boolean>;
-  verifyHelperCapability: (token: string, code: string) => Promise<boolean>;
-  joinHelper: (token: string, code: string) => boolean;
-  sendProposals: (ids: string[]) => boolean;
+  verifyHelperCapability: (token: string, code: string, displayName: string) => Promise<boolean>;
+  joinHelper: (token: string, code: string, displayName?: string) => boolean;
+  sendProposals: (suggestions: string[] | HelperSuggestion[]) => boolean;
   decide: (id: string, status: "approved" | "rejected", note?: string) => boolean;
   requestChanges: (id: string, note: string) => boolean;
+  setField: (id: string, value: string) => boolean;
   sendMessage: (actor: "owner" | "helper", body: string, proposalId?: string) => boolean;
   complete: () => boolean;
   togglePause: () => void;
@@ -260,7 +263,10 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     setConnectionStatus("sharing");
     try {
       const remoteSession = await loadHelperSession(sessionId, token);
-      const credentials: RemoteCredentials = { role: "helper", helperToken: token };
+      const previousCredentials = remoteRef.current;
+      const credentials: RemoteCredentials = previousCredentials?.role === "helper" && previousCredentials.helperToken === token
+        ? previousCredentials
+        : { role: "helper", helperToken: token };
       const restored = restoreLocalCapability(remoteSession, credentials, remoteSession);
       setStore((state) => ({ ...state, session: restored, remote: credentials, ui: { ...state.ui, stage: "workspace" } }));
       setLastError(null); setConnectionStatus("shared");
@@ -271,18 +277,20 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const verifyHelperCapability = useCallback(async (token: string, code: string): Promise<boolean> => {
+  const verifyHelperCapability = useCallback(async (token: string, code: string, displayName: string): Promise<boolean> => {
     const credentials = remoteRef.current;
-    if (!credentials || credentials.role !== "helper" || !token || !code) return command({ type: "JOIN_HELPER", actor: "helper", token, code });
+    if (!credentials || credentials.role !== "helper" || !token || !code) {
+      return command({ type: "JOIN_HELPER", actor: "helper", token, code, displayName });
+    }
     try {
-      const remoteSession = await verifyHelperSession(currentSessionRef.current.id, token, code);
+      const remoteSession = await verifyHelperSession(currentSessionRef.current.id, token, code, displayName);
       const nextCredentials: RemoteCredentials = { ...credentials, verificationCode: code };
       const restored = restoreLocalCapability(remoteSession, nextCredentials, currentSessionRef.current);
       setStore((state) => ({ ...state, session: restored, remote: nextCredentials }));
       setLastError(null); setConnectionStatus("shared");
       return true;
     } catch (error) {
-      setLastError(error instanceof Error ? error.message : "The verification code is invalid.");
+      setLastError(error instanceof Error ? error.message : "The name or verification code could not be accepted.");
       return false;
     }
   }, [command]);
@@ -293,20 +301,27 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const remainingSeconds = remainingSessionSeconds(session, clock);
   const autoPauseSeconds = session.status === "active" ? Math.max(0, Math.ceil((AUTO_PAUSE_MS - (clock - new Date(session.lastActiveAt).getTime())) / 1_000)) : 0;
   const helperUrl = typeof location === "undefined" ? `/helper?session=${session.id}&token=${encodeURIComponent(session.invite.token)}` : `${location.origin}/helper?session=${session.id}&token=${encodeURIComponent(session.invite.token)}`;
+  const helperVerified = remote?.role === "helper" && Boolean(remote.verificationCode);
 
   const value: DemoContextValue = {
     ...ui, session, scenario, scenarioId: session.scenarioId, mode: session.contract.mode, statuses,
-    paused: session.status === "paused", stopped: ["stopped", "expired"].includes(session.status), startedAt: session.createdAt,
+    paused: session.status === "paused", stopped: ["stopped", "expired", "completed"].includes(session.status), helperVerified, startedAt: session.createdAt,
     remainingSeconds, autoPauseSeconds, lastError, helperUrl, receipt, connectionStatus,
     configureSession: (scenarioId, mode, task) => replaceSession(freshSession(scenarioId, mode, task)),
     setScenario: (scenarioId) => replaceSession(freshSession(scenarioId, session.contract.mode)),
     setMode: (mode) => replaceSession(freshSession(session.scenarioId, mode, session.contract.task)),
     setTask: (task) => replaceSession(freshSession(session.scenarioId, session.contract.mode, task)),
     setStage: (stage) => setUi({ stage }), publishSession, openHelperSession, verifyHelperCapability,
-    joinHelper: (token, code) => command({ type: "JOIN_HELPER", actor: "helper", token, code }),
-    sendProposals: (proposalIds) => command({ type: "SEND_PROPOSALS", actor: "helper", proposalIds }),
+    joinHelper: (token, code, displayName) => command({ type: "JOIN_HELPER", actor: "helper", token, code, displayName }),
+    sendProposals: (items) => {
+      const suggestions: HelperSuggestion[] = items.map((item) => typeof item === "string"
+        ? { proposalId: item, value: scenario.proposals.find((proposal) => proposal.id === item)?.proposed ?? "" }
+        : item);
+      return command({ type: "SEND_PROPOSALS", actor: "helper", suggestions });
+    },
     decide: (proposalId, status, note) => command({ type: "DECIDE", actor: "owner", proposalId, decision: status === "approved" ? "approve" : "reject", note }),
     requestChanges: (proposalId, note) => command({ type: "DECIDE", actor: "owner", proposalId, decision: "request-changes", note }),
+    setField: (proposalId, fieldValue) => command({ type: "SET_FIELD", actor: "owner", proposalId, value: fieldValue }),
     sendMessage: (actor, body, proposalId) => command({ type: "MESSAGE", actor, body, proposalId }),
     complete: () => command({ type: "COMPLETE", actor: "owner" }),
     togglePause: () => command({ type: session.status === "paused" ? "RESUME" : "PAUSE", actor: "owner" }),

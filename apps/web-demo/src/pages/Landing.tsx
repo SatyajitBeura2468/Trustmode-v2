@@ -3,40 +3,42 @@ import { Link } from "react-router-dom";
 import { Header, Mark } from "../components/Brand";
 import { scenarioList } from "@trustmode/core";
 import { useDemo } from "../state/DemoContext";
-import { getMessages } from "../i18n";
+import { getMessages, getScenarioCopy } from "../i18n";
 
 const icons = { scholarship: GraduationCap, hospital: HeartPulse, admission: School };
 
 function ProductTableau() {
+  const { language } = useDemo();
+  const t = getMessages(language).landing;
   return (
-    <div className="tableau" aria-label="A proposal moves safely from helper to owner">
+    <div className="tableau" aria-label={t.tableauAria}>
       <section className="tableau-side tableau-helper">
         <UserRound aria-hidden="true" />
-        <strong>HELPER</strong>
-        <p>Prepares the task<br />in a Ghost Workspace</p>
+        <strong>{t.helper}</strong>
+        <p>{t.helperLead}</p>
         <div className="mini-form">
-          <span>College admission</span>
+          <span>{getScenarioCopy(language, "admission").title}</span>
           <i />
-          <div><FileCheck2 /><span>Education details</span><Check /></div>
-          <div><FileCheck2 /><span>Documents</span><Check /></div>
-          <div className="mini-muted"><span>Payment info</span><small>Owner only</small></div>
+          <div><FileCheck2 /><span>{getScenarioCopy(language, "admission").sectionTitle}</span><Check /></div>
+          <div><FileCheck2 /><span>{getScenarioCopy(language, "admission").steps[2]}</span><Check /></div>
+          <div className="mini-muted"><span>{t.privateExample}</span><small>{t.ownerOnly}</small></div>
         </div>
       </section>
       <div className="passage">
-        <span>proposal<br />packet</span>
-        <div className="packet"><FileCheck2 /><b>3 safe details</b><small>Ready for review</small></div>
+        <span>{t.suggestion}</span>
+        <div className="packet"><FileCheck2 /><b>{t.suggestion}</b><small>{t.readyReview}</small></div>
         <ArrowRight />
       </div>
       <section className="tableau-side tableau-owner">
         <UserRound aria-hidden="true" />
-        <strong>OWNER</strong>
-        <p>Reviews, decides,<br />and applies</p>
+        <strong>{t.owner}</strong>
+        <p>{t.ownerLead}</p>
         <div className="mini-review">
-          <b>Review proposal</b>
-          <div><span>Education details</span><ArrowRight /></div>
-          <div><span>Documents</span><ArrowRight /></div>
-          <p><Check /> You make the final call.</p>
-          <button tabIndex={-1}>Approve & continue</button>
+          <b>{t.reviewSuggestion}</b>
+          <div><span>{getScenarioCopy(language, "admission").sectionTitle}</span><ArrowRight /></div>
+          <div><span>{getScenarioCopy(language, "admission").steps[2]}</span><ArrowRight /></div>
+          <p><Check /> {t.finalCall}</p>
+          <button tabIndex={-1}>{t.approveContinue}</button>
         </div>
       </section>
     </div>
@@ -64,16 +66,10 @@ export function Landing() {
         </section>
 
         <section className="how" id="how">
-          <div className="section-intro">
-            <h2>How it works<br />in 3 simple steps.</h2>
-          </div>
-          {[
-            ["1", "Helper prepares", "Your helper works with safe structure and derived facts—not your private account.", "helper"],
-            ["2", "TrustMode checks", "Every proposal is checked for purpose, privacy, risk, and consequence.", "checks"],
-            ["3", "You decide", "Review what changes, what stays private, and apply only what you approve.", "owner"],
-          ].map(([number, title, body, tone]) => (
-            <article className={`step step--${tone}`} key={number}>
-              <span>{number}</span>
+          <div className="section-intro"><h2>{t.landing.howTitle}</h2></div>
+          {t.landing.steps.map(([title, body], index) => (
+            <article className={`step step--${index === 0 ? "helper" : index === 2 ? "owner" : "checks"}`} key={title}>
+              <span>{index + 1}</span>
               <div><h3>{title}</h3><p>{body}</p></div>
             </article>
           ))}
@@ -81,16 +77,17 @@ export function Landing() {
 
         <section className="scenarios">
           <div className="section-intro">
-            <h2>Common moments<br />where help matters.</h2>
-            <p>Explore the same safety model across three fictional services.</p>
+            <h2>{t.landing.momentsTitle}</h2>
+            <p>{t.landing.momentsLead}</p>
           </div>
           <div className="scenario-rail">
             {scenarioList.map((scenario) => {
               const Icon = icons[scenario.id];
+              const copy = getScenarioCopy(language, scenario.id);
               return (
                 <Link key={scenario.id} to={`/demo/${scenario.id}`} className={`scenario scenario--${scenario.id}`}>
                   <Icon />
-                  <span><strong>{scenario.shortTitle}</strong><small>{scenario.description}</small></span>
+                  <span><strong>{copy.shortTitle}</strong><small>{copy.description}</small></span>
                   <ArrowRight />
                 </Link>
               );
@@ -100,8 +97,8 @@ export function Landing() {
 
         <section className="manifesto">
           <Mark size={64} />
-          <blockquote>“The helper may prepare the task, but never receives custody of the account or authority to execute it.”</blockquote>
-          <Link className="button button--light" to="/safety">Explore the safety model <ArrowRight /></Link>
+          <blockquote>“{t.landing.promise}”</blockquote>
+          <Link className="button button--light" to="/safety">{t.landing.exploreSafety} <ArrowRight /></Link>
         </section>
       </main>
       <footer><BrandFooter /></footer>
@@ -110,5 +107,7 @@ export function Landing() {
 }
 
 function BrandFooter() {
-  return <div className="footer-inner"><div className="footer-brand"><Mark /><strong>TrustMode</strong></div><p>Controlled product v2 · Synthetic workflows only · Final actions stay owner-only</p><span>© 2026 Satyajit Beura</span></div>;
+  const { language } = useDemo();
+  const t = getMessages(language);
+  return <div className="footer-inner"><div className="footer-brand"><Mark /><strong>TrustMode</strong></div><p>{t.landing.footer}</p><span>© 2026 Satyajit Beura</span></div>;
 }

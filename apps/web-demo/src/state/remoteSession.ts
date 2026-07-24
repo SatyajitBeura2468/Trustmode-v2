@@ -47,8 +47,13 @@ export async function loadHelperSession(sessionId: string, helperToken: string):
   return assertData(data, error);
 }
 
-export async function verifyHelperSession(sessionId: string, helperToken: string, verificationCode: string): Promise<TrustSession> {
-  const { data, error } = await supabase.rpc("tm_helper_join", { p_session_id: sessionId, p_helper_token: helperToken, p_code: verificationCode });
+export async function verifyHelperSession(sessionId: string, helperToken: string, verificationCode: string, displayName: string): Promise<TrustSession> {
+  const { data, error } = await supabase.rpc("tm_helper_join", {
+    p_session_id: sessionId,
+    p_helper_token: helperToken,
+    p_code: verificationCode,
+    p_helper_name: displayName,
+  });
   return assertData(data, error);
 }
 
