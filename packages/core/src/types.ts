@@ -58,8 +58,10 @@ export interface Scenario {
   description: string;
   accent: string;
   task: string;
-  helperName: string;
-  ownerName: string;
+  /** Kept optional so old non-routed demo files still compile. Real names live in the session. */
+  helperName?: string;
+  ownerName?: string;
+  workStepIndex: number;
   derivedFacts: string[];
   allowedTargets: string[];
   proposals: Proposal[];
@@ -87,6 +89,8 @@ export interface ProposalRecord {
   sentAt?: string;
   decidedAt?: string;
   note?: string;
+  suggestedValue?: string;
+  source?: "helper" | "owner";
 }
 
 export interface IntentContract {
@@ -106,6 +110,11 @@ export interface CapabilityInvite {
   expiresAt: string;
   joinedAt?: string;
   revokedAt?: string;
+}
+
+export interface HelperParticipant {
+  displayName: string;
+  joinedAt: string;
 }
 
 export interface SessionMessage {
@@ -135,6 +144,7 @@ export interface TrustSession {
   scenarioId: ScenarioId;
   contract: IntentContract;
   invite: CapabilityInvite;
+  helper?: HelperParticipant;
   createdAt: string;
   updatedAt: string;
   lastActiveAt: string;
@@ -159,13 +169,18 @@ export interface Receipt {
   integrity: string;
 }
 
+export interface HelperSuggestion {
+  proposalId: string;
+  value: string;
+}
+
 export type SessionCommand =
-  | { type: "JOIN_HELPER"; actor: "helper"; token: string; code: string }
+  | { type: "JOIN_HELPER"; actor: "helper"; token: string; code: string; displayName?: string }
   | { type: "PAUSE"; actor: "owner" }
   | { type: "RESUME"; actor: "owner" }
   | { type: "STOP"; actor: "owner" }
   | { type: "EXPIRE"; actor: "system" }
-  | { type: "SEND_PROPOSALS"; actor: "helper"; proposalIds: string[] }
+  | { type: "SEND_PROPOSALS"; actor: "helper"; suggestions: HelperSuggestion[] }
   | {
       type: "DECIDE";
       actor: "owner";
@@ -173,5 +188,6 @@ export type SessionCommand =
       decision: "approve" | "reject" | "request-changes";
       note?: string;
     }
+  | { type: "SET_FIELD"; actor: "owner"; proposalId: string; value: string }
   | { type: "MESSAGE"; actor: "owner" | "helper"; body: string; proposalId?: string }
   | { type: "COMPLETE"; actor: "owner" };
