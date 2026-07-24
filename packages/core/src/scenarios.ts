@@ -43,8 +43,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
     description: "Prepare education and eligibility details without exposing identity documents.",
     accent: "#9d6200",
     task: "Help complete a fictional student scholarship application.",
-    helperName: "Priya",
-    ownerName: "Aarav",
+    workStepIndex: 1,
     derivedFacts: [
       "Applicant meets the age requirement.",
       "Household income is below the eligibility limit.",
@@ -64,8 +63,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
     description: "Prepare a fictional appointment while medical records and identity values remain private.",
     accent: "#315ff4",
     task: "Help prepare a fictional hospital outpatient registration.",
-    helperName: "Meera",
-    ownerName: "Kabir",
+    workStepIndex: 1,
     derivedFacts: [
       "The selected department accepts new appointments.",
       "The patient is eligible for the concession category.",
@@ -85,8 +83,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
     description: "Prepare course choices and education details without sharing raw certificates.",
     accent: "#16785a",
     task: "Help prepare a fictional undergraduate admission form.",
-    helperName: "Ananya",
-    ownerName: "Ishaan",
+    workStepIndex: 1,
     derivedFacts: [
       "The applicant meets the course prerequisites.",
       "The qualifying certificate is valid.",
