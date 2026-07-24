@@ -6,6 +6,7 @@ import { Workspace } from "./pages/Workspace";
 import { InfoPage } from "./pages/Info";
 import { HelperWorkspacePage } from "./pages/HelperWorkspace";
 import { ControlledPortalPage } from "./pages/ControlledPortal";
+import { OwnerTask } from "./components/SharedTask";
 
 export function App() {
   const location = useLocation();
@@ -17,7 +18,7 @@ export function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/demo" element={<DemoStart />} />
       <Route path="/demo/:scenario" element={<DemoStart />} />
-      <Route path="/demo/:scenario/session" element={<Workspace />} />
+      <Route path="/demo/:scenario/session" element={<OwnerTask />} />
       <Route path="/owner" element={<Navigate to="/demo/scholarship/session" replace />} />
       <Route path="/helper" element={<HelperWorkspacePage />} />
       <Route path="/portal/:scenario" element={<ControlledPortalPage />} />

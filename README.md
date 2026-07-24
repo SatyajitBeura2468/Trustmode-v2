@@ -40,7 +40,7 @@
 
 ## Live product
 
-The public v2 product is a real, interactive, secret-free controlled collaboration system. Choose a fictional scholarship, hospital-registration, or college-admission workflow; create an enforceable Intent Contract; issue an expiring helper capability; collaborate across tabs; prepare semantic proposals; run six fail-closed policy checks; review privacy and consequences; apply approved changes owner-side; stop and revoke the session; and export an integrity-linked receipt.
+The public v2 product is a real, interactive, secret-free controlled collaboration system. Choose a fictional scholarship, hospital-registration, or college-admission workflow; explain help permissions in plain language; issue a short-lived secure invitation; work on the same visible form; review suggested changes one at a time; pause or end help immediately; and keep final submission owner-only.
 
 **Launch:** [trustmode-v2.vercel.app](https://trustmode-v2.vercel.app)
 
@@ -130,7 +130,7 @@ flowchart LR
   G --> X["Redacted receipt"]
 ```
 
-`@trustmode/core` owns the pure session state machine, typed commands, expiring capabilities, proposal lifecycle, action semantics, six-check fail-closed policy, redaction, integrity events, controlled portal state, and receipts. TrustMode v2.1 stores shared synthetic sessions in a Supabase Postgres project through capability-checked RPC functions. Owner and helper browsers synchronise with revision-aware polling; browser storage remains only as an owner-device recovery cache.
+`@trustmode/core` owns the pure session state machine, typed commands, expiring capabilities, proposal lifecycle, action semantics, six-check fail-closed policy, redaction, integrity events, controlled portal state, and receipts. TrustMode v2.2 stores shared synthetic sessions in a Supabase Postgres project through capability-checked RPC functions. Owner and helper browsers synchronise with revision-aware polling; browser storage remains only as an owner-device recovery cache. Invitation-code attempts are limited, direct table access is revoked, and helper writes cannot change protected values or session controls.
 
 ## Repository structure
 

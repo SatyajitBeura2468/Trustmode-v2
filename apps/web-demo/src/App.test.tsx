@@ -28,16 +28,16 @@ describe("TrustMode web demo", () => {
     expect(screen.getByRole("link", { name: /start a controlled session/i })).toBeTruthy();
   });
 
-  it("renders the Intent Contract for a selected scenario", () => {
+  it("explains help permissions for a selected scenario", () => {
     renderAt("/demo/scholarship");
-    expect(screen.getByRole("heading", { name: /clear boundaries/i })).toBeTruthy();
-    expect(screen.getByText(/the helper may not/i)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /what the person helping you can/i })).toBeTruthy();
+    expect(screen.getByText(/the person helping you cannot/i)).toBeTruthy();
   });
 
-  it("renders semantic proposals without private values", () => {
+  it("renders a shared form without exposing protected values", () => {
     renderAt("/demo/scholarship/session");
-    expect(screen.getByRole("heading", { name: "Ghost Workspace" })).toBeTruthy();
-    expect(screen.getAllByText(/select CBSE/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: /helping with education details/i })).toBeTruthy();
+    expect(screen.getByText(/visible only to you/i)).toBeTruthy();
     expect(screen.queryByText(/123456789012/)).toBeNull();
   });
 });

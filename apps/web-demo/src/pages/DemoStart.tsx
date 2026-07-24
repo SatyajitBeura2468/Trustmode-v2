@@ -55,7 +55,7 @@ export function DemoStart() {
     : null;
   const selected = routeScenario ?? demo.scenarioId;
   const sessionHealth = useMemo(
-    () => demo.session.status === "active" ? "Capability ready" : `Session ${demo.session.status}`,
+    () => demo.session.status === "active" ? "Invitation ready" : "Help session is no longer available",
     [demo.session.status],
   );
 
@@ -112,7 +112,7 @@ export function DemoStart() {
 
         {step === "scenario" ? (
           <section className="setup-panel">
-            <p className="quiet-label">Start a controlled help session</p>
+            <p className="quiet-label">Sample practice session</p>
             <h1>{t.chooseTask}</h1>
             <p className="lead">{t.chooseLead}</p>
             <div className="task-composer">
@@ -151,9 +151,9 @@ export function DemoStart() {
           <section className="setup-panel contract">
             <div className="contract-heading">
               <div>
-                <p className="quiet-label">Intent Contract</p>
-                <h1>Clear boundaries before help begins.</h1>
-                <p className="lead">For: <strong>{scenarios[selected].title}</strong>. Every proposal is checked against this contract.</p>
+                <p className="quiet-label">Help Permissions</p>
+                <h1>What the person helping you can and cannot do.</h1>
+                <p className="lead">For: <strong>{scenarios[selected].title}</strong>. This practice session uses sample information and does not submit anything to a real organisation.</p>
               </div>
               <aside>
                 <ShieldCheck />
@@ -178,8 +178,8 @@ export function DemoStart() {
               ))}
             </div>
             <div className="contract-columns">
-              <div><h2><Check /> The helper may</h2><ul><li>See allowlisted semantic fields</li><li>Use purpose-bound derived facts</li><li>Prepare reversible proposals</li><li>Ask for clarification</li></ul></div>
-              <div><h2><X /> The helper may not</h2><ul><li>See credentials, OTPs, or raw documents</li><li>Change account recovery or payment details</li><li>Write directly to the controlled portal</li><li>Submit or perform irreversible actions</li></ul></div>
+              <div><h2><Check /> The person helping you can</h2><ul><li>Suggest answers</li><li>Point out missing information</li><li>Explain confusing questions</li><li>Send changes for your approval</li></ul></div>
+              <div><h2><X /> The person helping you cannot</h2><ul><li>See your password or OTP</li><li>Make a payment</li><li>Submit the final form</li><li>Continue after you pause or end help</li></ul></div>
             </div>
             <div className="contract-proof">
               <KeyRound />
@@ -198,7 +198,7 @@ export function DemoStart() {
         {step === "invite" ? (
           <section className="setup-panel invite">
             <div className="invite-icon"><Link2 /></div>
-            <p className="quiet-label">Temporary capability</p>
+            <p className="quiet-label">Secure invitation</p>
             <h1>Invite someone you trust.</h1>
             <p className="lead">The link opens only the Ghost Workspace for this contract. It cannot reveal owner data or execute changes.</p>
             <div className="invite-health">
@@ -207,7 +207,7 @@ export function DemoStart() {
               <span><ShieldCheck /> One verified helper</span>
             </div>
             <div className="invite-code">
-              <span>{demo.helperUrl}</span>
+              <span>Secure invitation link ready to share</span>
               <button onClick={copyInvite}>{copied ? <Check /> : <Copy />}{copied ? "Copied" : "Copy link"}</button>
             </div>
             <div className="verification">

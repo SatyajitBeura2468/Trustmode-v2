@@ -16,6 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Header } from "../components/Brand";
 import { useDemo } from "../state/DemoContext";
+import { HelperTask } from "../components/SharedTask";
 
 function formatDuration(seconds: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -117,6 +118,8 @@ export function HelperWorkspacePage() {
       <button className="button button--large" onClick={() => void verify()} disabled={code.length !== 6}>Verify and enter <ArrowRight /></button>
     </main></div>;
   }
+
+  return <HelperTask />;
 
   return <div className="helper-shell">
     <Header compact />
