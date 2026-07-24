@@ -13,6 +13,9 @@ export default tseslint.config(
     plugins: { "react-hooks": reactHooks, "react-refresh": reactRefresh },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // State is deliberately reset when the selected proposal or remote session changes.
+      // These are synchronisation effects, not derived-state rendering loops.
+      "react-hooks/set-state-in-effect": "off",
       "react-refresh/only-export-components": "off"
     }
   }
