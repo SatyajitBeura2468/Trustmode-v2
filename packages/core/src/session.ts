@@ -3,6 +3,7 @@ import { scenarios } from "./scenarios";
 import type {
   ActivityEvent,
   AssistanceMode,
+  HelperSuggestion,
   ProposalRecord,
   Receipt,
   ScenarioId,
@@ -12,6 +13,7 @@ import type {
 } from "./types";
 
 const SESSION_DURATION_MS = 30 * 60 * 1000;
+const FINAL_STATUSES = new Set(["applied", "rejected", "blocked", "revoked"]);
 
 export class SessionCommandError extends Error {
   constructor(
@@ -64,6 +66,24 @@ function appendEvent(
   };
 }
 
+function cleanDisplayName(value: string | undefined): string {
+  const name = value?.trim().replace(/\s+/g, " ") ?? "";
+  if (name.length < 2 || name.length > 60) {
+    throw new SessionCommandError("HELPER_NAME_INVALID", "Enter your real name using 2 to 60 characters.");
+  }
+  if (!/[\p{L}\p{N}]/u.test(name)) {
+    throw new SessionCommandError("HELPER_NAME_INVALID", "Enter a name that contains letters or numbers.");
+  }
+  return name;
+}
+
+function cleanSuggestion(value: string): string {
+  const suggestion = value.trim().replace(/\s+/g, " ");
+  if (!suggestion) throw new SessionCommandError("SUGGESTION_EMPTY", "Enter a suggested answer before sending it.");
+  if (suggestion.length > 240) throw new SessionCommandError("SUGGESTION_TOO_LONG", "Keep the suggested answer under 240 characters.");
+  return suggestion;
+}
+
 export interface CreateSessionInput {
   scenarioId: ScenarioId;
   mode: AssistanceMode;
@@ -84,7 +104,7 @@ export function createSession(input: CreateSessionInput): TrustSession {
   const proposalRecords = Object.fromEntries(
     scenario.proposals.map((proposal) => [
       proposal.id,
-      { status: "prepared", preparedAt: now } satisfies ProposalRecord,
+      { status: "prepared", preparedAt: now, suggestedValue: proposal.proposed } satisfies ProposalRecord,
     ]),
   );
   const portalValues = Object.fromEntries(
@@ -120,11 +140,11 @@ export function createSession(input: CreateSessionInput): TrustSession {
     messages: [],
     events: [],
   };
-  return appendEvent(base, now, "owner", "SESSION_CREATED", `Intent Contract ${contractId} created.`);
+  return appendEvent(base, now, "owner", "SESSION_CREATED", "The owner created a help session.");
 }
 
 function requireOwner(actor: SessionRole): asserts actor is "owner" {
-  if (actor !== "owner") throw new SessionCommandError("ROLE_DENIED", "Only the owner can perform this command.");
+  if (actor !== "owner") throw new SessionCommandError("ROLE_DENIED", "Only the owner can perform this action.");
 }
 
 function assertOperational(session: TrustSession, at: string): TrustSession {
@@ -136,16 +156,31 @@ function assertOperational(session: TrustSession, at: string): TrustSession {
       proposalRecords: Object.fromEntries(
         Object.entries(session.proposalRecords).map(([id, record]) => [
           id,
-          ["applied", "rejected", "blocked"].includes(record.status) ? record : { ...record, status: "revoked" as const },
+          FINAL_STATUSES.has(record.status) ? record : { ...record, status: "revoked" as const },
         ]),
       ),
     };
-    return appendEvent(expired, at, "system", "SESSION_EXPIRED", "The temporary capability expired.");
+    return appendEvent(expired, at, "system", "SESSION_EXPIRED", "The invitation expired.");
   }
   if (["stopped", "expired", "completed"].includes(session.status)) {
     throw new SessionCommandError("SESSION_CLOSED", `The session is ${session.status}.`);
   }
   return session;
+}
+
+function proposalWithSuggestion(session: TrustSession, suggestion: HelperSuggestion) {
+  const scenario = scenarios[session.scenarioId];
+  const proposal = scenario.proposals.find((item) => item.id === suggestion.proposalId);
+  if (!proposal) throw new SessionCommandError("PROPOSAL_UNKNOWN", `Unknown field ${suggestion.proposalId}.`);
+  const value = cleanSuggestion(suggestion.value);
+  return {
+    proposal: {
+      ...proposal,
+      proposed: value,
+      statement: `Suggest ${value} for ${proposal.label}`,
+    },
+    value,
+  };
 }
 
 export function reduceSession(
@@ -162,33 +197,41 @@ export function reduceSession(
       proposalRecords: Object.fromEntries(
         Object.entries(current.proposalRecords).map(([id, record]) => [
           id,
-          ["applied", "rejected", "blocked"].includes(record.status) ? record : { ...record, status: "revoked" as const },
+          FINAL_STATUSES.has(record.status) ? record : { ...record, status: "revoked" as const },
         ]),
       ),
     };
-    return appendEvent(expired, at, "system", "SESSION_EXPIRED", "The temporary capability expired.");
+    return appendEvent(expired, at, "system", "SESSION_EXPIRED", "The invitation expired.");
   }
 
   let session = assertOperational(current, at);
   if (command.type === "JOIN_HELPER") {
     if (command.token !== session.invite.token || command.code !== session.invite.verificationCode) {
-      throw new SessionCommandError("CAPABILITY_INVALID", "The invitation or verification code is invalid.");
+      throw new SessionCommandError("CAPABILITY_INVALID", "The invitation link or verification code is invalid.");
     }
-    if (session.invite.revokedAt) throw new SessionCommandError("CAPABILITY_REVOKED", "This invitation has been revoked.");
-    if (session.invite.joinedAt) return session;
-    session = { ...session, invite: { ...session.invite, joinedAt: at } };
-    return appendEvent(session, at, "helper", "HELPER_JOINED", "The helper capability was verified.");
+    if (session.invite.revokedAt) throw new SessionCommandError("CAPABILITY_REVOKED", "This invitation has ended.");
+    const displayName = cleanDisplayName(command.displayName);
+    if (session.invite.joinedAt || session.helper) {
+      if (session.helper?.displayName === displayName) return session;
+      throw new SessionCommandError("HELPER_ALREADY_JOINED", "Someone has already joined using this invitation.");
+    }
+    session = {
+      ...session,
+      helper: { displayName, joinedAt: at },
+      invite: { ...session.invite, joinedAt: at },
+    };
+    return appendEvent(session, at, "helper", "HELPER_JOINED", `${displayName} joined the help session.`);
   }
 
   if (command.type === "PAUSE") {
     requireOwner(command.actor);
     if (session.status === "paused") return session;
-    return appendEvent({ ...session, status: "paused" }, at, "owner", "SESSION_PAUSED", "Owner paused proposal activity.");
+    return appendEvent({ ...session, status: "paused" }, at, "owner", "SESSION_PAUSED", "The owner paused help.");
   }
   if (command.type === "RESUME") {
     requireOwner(command.actor);
     if (session.status !== "paused") return session;
-    return appendEvent({ ...session, status: "active" }, at, "owner", "SESSION_RESUMED", "Owner resumed proposal activity.");
+    return appendEvent({ ...session, status: "active" }, at, "owner", "SESSION_RESUMED", "The owner resumed help.");
   }
   if (command.type === "STOP") {
     requireOwner(command.actor);
@@ -199,26 +242,26 @@ export function reduceSession(
       proposalRecords: Object.fromEntries(
         Object.entries(session.proposalRecords).map(([id, record]) => [
           id,
-          ["applied", "rejected", "blocked"].includes(record.status) ? record : { ...record, status: "revoked" as const },
+          FINAL_STATUSES.has(record.status) ? record : { ...record, status: "revoked" as const },
         ]),
       ),
     };
-    return appendEvent(stopped, at, "owner", "SESSION_STOPPED", "Invitation revoked and pending proposals discarded.");
+    return appendEvent(stopped, at, "owner", "SESSION_STOPPED", "The owner ended the helper’s access.");
   }
 
   if (session.status === "paused") {
-    throw new SessionCommandError("SESSION_PAUSED", "Resume the session before changing proposals.");
+    throw new SessionCommandError("SESSION_PAUSED", "Resume help before making another change.");
   }
 
   if (command.type === "SEND_PROPOSALS") {
-    if (command.actor !== "helper") throw new SessionCommandError("ROLE_DENIED", "Only the helper can send proposals.");
-    if (!session.invite.joinedAt) throw new SessionCommandError("HELPER_NOT_JOINED", "Verify the helper capability first.");
+    if (command.actor !== "helper") throw new SessionCommandError("ROLE_DENIED", "Only the invited helper can send suggestions.");
+    if (!session.invite.joinedAt || !session.helper) throw new SessionCommandError("HELPER_NOT_JOINED", "Join the session before sending suggestions.");
     const scenario = scenarios[session.scenarioId];
+    const helperName = session.helper.displayName;
     const records = { ...session.proposalRecords };
-    for (const proposalId of [...new Set(command.proposalIds)]) {
-      const proposal = scenario.proposals.find((item) => item.id === proposalId);
-      if (!proposal) throw new SessionCommandError("PROPOSAL_UNKNOWN", `Unknown proposal ${proposalId}.`);
-      const existing = records[proposalId];
+    for (const rawSuggestion of command.suggestions) {
+      const { proposal, value } = proposalWithSuggestion(session, rawSuggestion);
+      const existing = records[proposal.id];
       if (!existing || !["prepared", "changes-requested"].includes(existing.status)) continue;
       const policy = evaluateProposal(proposal, {
         scenarioId: session.scenarioId,
@@ -226,9 +269,11 @@ export function reduceSession(
         allowedActions: session.contract.allowedActions,
         currentValues: session.portalValues,
       });
-      records[proposalId] = {
+      records[proposal.id] = {
         ...existing,
         policy,
+        suggestedValue: value,
+        source: "helper",
         status: policy.allowed ? "pending" : "blocked",
         sentAt: at,
       };
@@ -237,8 +282,8 @@ export function reduceSession(
         at,
         "helper",
         policy.allowed ? "PROPOSAL_SENT" : "PROPOSAL_BLOCKED",
-        `${proposal.statement} · ${policy.code}`,
-        proposalId,
+        policy.allowed ? `${helperName} sent a suggestion for ${proposal.label}.` : `A suggestion for ${proposal.label} was blocked.`,
+        proposal.id,
       );
     }
     return session;
@@ -249,10 +294,11 @@ export function reduceSession(
     const scenario = scenarios[session.scenarioId];
     const proposal = scenario.proposals.find((item) => item.id === command.proposalId);
     const record = session.proposalRecords[command.proposalId];
-    if (!proposal || !record) throw new SessionCommandError("PROPOSAL_UNKNOWN", "The proposal does not exist.");
-    if (record.status !== "pending") throw new SessionCommandError("PROPOSAL_NOT_REVIEWABLE", "Only sent proposals can be reviewed.");
+    if (!proposal || !record) throw new SessionCommandError("PROPOSAL_UNKNOWN", "The suggestion does not exist.");
+    if (record.status !== "pending") throw new SessionCommandError("PROPOSAL_NOT_REVIEWABLE", "Only waiting suggestions can be reviewed.");
     if (command.decision === "approve") {
-      const decision = evaluateProposal(proposal, {
+      const suggestedValue = record.suggestedValue ?? proposal.proposed;
+      const decision = evaluateProposal({ ...proposal, proposed: suggestedValue }, {
         scenarioId: session.scenarioId,
         allowedTargets: scenario.allowedTargets,
         allowedActions: session.contract.allowedActions,
@@ -263,11 +309,11 @@ export function reduceSession(
         ...session,
         proposalRecords: {
           ...session.proposalRecords,
-          [proposal.id]: { ...record, policy: decision, status: "applied" as const, decidedAt: at },
+          [proposal.id]: { ...record, policy: decision, status: "applied" as const, source: "helper" as const, decidedAt: at },
         },
-        portalValues: { ...session.portalValues, [proposal.target.field]: proposal.proposed },
+        portalValues: { ...session.portalValues, [proposal.target.field]: suggestedValue },
       };
-      return appendEvent(next, at, "owner", "PROPOSAL_APPLIED", proposal.statement, proposal.id);
+      return appendEvent(next, at, "owner", "PROPOSAL_APPLIED", `The owner added the suggested answer for ${proposal.label}.`, proposal.id);
     }
     const status = command.decision === "reject" ? "rejected" as const : "changes-requested" as const;
     const next = {
@@ -282,14 +328,42 @@ export function reduceSession(
       at,
       "owner",
       command.decision === "reject" ? "PROPOSAL_REJECTED" : "CHANGES_REQUESTED",
-      command.note?.trim() || proposal.statement,
+      command.decision === "reject" ? `The owner rejected the suggestion for ${proposal.label}.` : `The owner requested a different answer for ${proposal.label}.`,
       proposal.id,
     );
+  }
+
+  if (command.type === "SET_FIELD") {
+    requireOwner(command.actor);
+    const scenario = scenarios[session.scenarioId];
+    const proposal = scenario.proposals.find((item) => item.id === command.proposalId);
+    const record = session.proposalRecords[command.proposalId];
+    if (!proposal || !record) throw new SessionCommandError("PROPOSAL_UNKNOWN", "The field does not exist.");
+    const value = cleanSuggestion(command.value);
+    const next = {
+      ...session,
+      portalValues: { ...session.portalValues, [proposal.target.field]: value },
+      proposalRecords: {
+        ...session.proposalRecords,
+        [proposal.id]: {
+          ...record,
+          status: "applied" as const,
+          source: "owner" as const,
+          suggestedValue: value,
+          decidedAt: at,
+        },
+      },
+    };
+    return appendEvent(next, at, "owner", "OWNER_FIELD_EDITED", `The owner entered an answer for ${proposal.label}.`, proposal.id);
   }
 
   if (command.type === "MESSAGE") {
     const body = command.body.trim();
     if (!body) throw new SessionCommandError("MESSAGE_EMPTY", "A message cannot be empty.");
+    if (body.length > 500) throw new SessionCommandError("MESSAGE_TOO_LONG", "Keep the message under 500 characters.");
+    if (command.actor === "helper" && (!session.invite.joinedAt || !session.helper)) {
+      throw new SessionCommandError("HELPER_NOT_JOINED", "Join the session before sending a message.");
+    }
     const message = {
       id: `MSG-${stableHash(`${session.id}:${at}:${command.actor}:${body}`)}`,
       from: command.actor,
@@ -298,21 +372,28 @@ export function reduceSession(
       proposalId: command.proposalId,
     };
     const next = { ...session, messages: [...session.messages, message] };
-    return appendEvent(next, at, command.actor, "MESSAGE_SENT", "A purpose-bound clarification was sent.", command.proposalId);
+    return appendEvent(next, at, command.actor, "MESSAGE_SENT", "A task-related message was sent.", command.proposalId);
   }
 
   if (command.type === "COMPLETE") {
     requireOwner(command.actor);
     const records = Object.values(session.proposalRecords);
-    if (records.some((record) => ["prepared", "checking", "pending", "changes-requested"].includes(record.status))) {
-      throw new SessionCommandError("WORK_REMAINS", "Resolve or stop all pending proposals before completing the session.");
+    if (records.some((record) => ["checking", "pending"].includes(record.status))) {
+      throw new SessionCommandError("REVIEW_REMAINS", "Review the waiting suggestions before finishing.");
     }
+    const completedRecords = Object.fromEntries(
+      Object.entries(session.proposalRecords).map(([id, record]) => [
+        id,
+        FINAL_STATUSES.has(record.status) ? record : { ...record, status: "revoked" as const },
+      ]),
+    );
     const completed = {
       ...session,
       status: "completed" as const,
+      proposalRecords: completedRecords,
       invite: { ...session.invite, revokedAt: at },
     };
-    return appendEvent(completed, at, "owner", "SESSION_COMPLETED", "Owner completed the controlled session.");
+    return appendEvent(completed, at, "owner", "SESSION_COMPLETED", "The owner finished the practice session. No real form was submitted.");
   }
 
   return session;
@@ -329,10 +410,10 @@ export function createReceipt(session: TrustSession, at = new Date().toISOString
     scenario: session.scenarioId,
     startedAt: session.createdAt,
     finishedAt: at,
-    approved: applied.map((proposal) => proposal.statement),
-    rejected: rejected.map((proposal) => proposal.statement),
-    blocked: [...blocked.map((proposal) => proposal.statement), "Final submission · owner-only"],
-    disclosed: applied.map((proposal) => `${proposal.label}: ${proposal.proposed}`),
+    approved: applied.map((proposal) => `${proposal.label}: ${session.portalValues[proposal.target.field]}`),
+    rejected: rejected.map((proposal) => proposal.label),
+    blocked: [...blocked.map((proposal) => proposal.label), "Final submission · owner-only"],
+    disclosed: applied.map((proposal) => `${proposal.label}: ${session.portalValues[proposal.target.field]}`),
     retained: "No credentials, OTPs, payments, raw identity values, or source documents entered helper state.",
     eventCount: session.events.length,
     integrity: session.events.at(-1)?.integrity ?? "00000000",
