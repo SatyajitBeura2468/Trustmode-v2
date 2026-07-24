@@ -52,7 +52,12 @@ test("verified helper identity and custom suggestion synchronise between browser
 
   const board = helper.locator(".helper-answer").filter({ hasText: "Board" });
   await board.getByLabel("Suggested answer").fill("CHSE Odisha");
+  const saveResponsePromise = helper.waitForResponse((response) => response.url().includes("/rpc/tm_save_helper_session"));
   await board.getByRole("button", { name: /Send suggestion/i }).click();
+  const saveResponse = await saveResponsePromise;
+  const saveBody = await saveResponse.text();
+  console.log(`tm_save_helper_session ${saveResponse.status()}: ${saveBody}`);
+  expect(saveResponse.ok(), saveBody).toBeTruthy();
 
   await expect(owner.getByRole("heading", { name: new RegExp(`${displayName} suggested a change`, "i") })).toBeVisible({ timeout: 10_000 });
   await expect(owner.getByText("CHSE Odisha", { exact: true })).toBeVisible();
